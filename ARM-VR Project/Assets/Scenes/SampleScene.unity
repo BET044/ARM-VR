@@ -564,7 +564,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   handMovement: {fileID: 1910787403}
-  sensibilidad: 5
+  inputActionsAsset: {fileID: -944628639613478452, guid: 84ab82ee448994b45b88f9d5a408cb53, type: 3}
+  rotationSpeed: 90
 --- !u!114 &1910787403
 MonoBehaviour:
   m_ObjectHideFlags: 0
