@@ -2,43 +2,50 @@ using UnityEngine;
 
 public class HandMovement : MonoBehaviour
 {
-    // Asigna los 5 huesos de la mano en el Inspector.
-    public Transform[] bones = new Transform[5];
+    public HingeJoint[] boneJoints = new HingeJoint[5];
 
-    /// <summary>
-    /// Rota el hueso indicado a un ángulo en el eje X (puedes ajustar el eje según tu modelo).
-    /// </summary>
-    /// <param name="boneIndex">Índice del hueso (0 a 4).</param>
-    /// <param name="angle">Ángulo en grados.</param>
-    public void RotateBone(int boneIndex, float angle)
+    void Start()
     {
-        if (boneIndex < 0 || boneIndex >= bones.Length)
+        foreach (var joint in boneJoints)
         {
-            Debug.LogWarning("Índice de hueso fuera de rango.");
-            return;
-        }
-        
-        // Se establece la rotación local para el hueso.
-        if ((boneIndex == 3) || (boneIndex == 0))
-        {
-            // Rotación en el eje Z
-            bones[boneIndex].localRotation = Quaternion.Euler(0, angle, 0);
-        }
-        else
-        {
-            // Rotación en el eje X para los huesos restantes.
-            bones[boneIndex].localRotation = Quaternion.Euler(angle, 0, 0);
+            if (joint != null)
+            {
+                joint.useMotor = true;
+            }
         }
     }
 
-    /// <summary>
-    /// Restaura la rotación inicial (identidad) de todos los huesos.
-    /// </summary>
+    public void RotateBone(int boneIndex, float speed)
+    {
+        if (boneIndex < 0 || boneIndex >= boneJoints.Length || boneJoints[boneIndex] == null)
+        {
+            Debug.LogWarning("Índice de hueso fuera de rango o HingeJoint no asignado.");
+            return;
+        }
+
+        JointMotor motor = boneJoints[boneIndex].motor;
+        motor.force = 1000f;  // Ajusta la fuerza del motor según sea necesario.
+        motor.targetVelocity = speed;
+        boneJoints[boneIndex].motor = motor;
+    }
+
+    public void StopBoneRotation(int boneIndex)
+    {
+        if (boneIndex < 0 || boneIndex >= boneJoints.Length || boneJoints[boneIndex] == null)
+        {
+            return;
+        }
+
+        JointMotor motor = boneJoints[boneIndex].motor;
+        motor.targetVelocity = 0;
+        boneJoints[boneIndex].motor = motor;
+    }
+
     public void ResetHand()
     {
-        foreach (Transform bone in bones)
+        for (int i = 0; i < boneJoints.Length; i++)
         {
-            bone.localRotation = Quaternion.identity;
+            StopBoneRotation(i);
         }
     }
 }
