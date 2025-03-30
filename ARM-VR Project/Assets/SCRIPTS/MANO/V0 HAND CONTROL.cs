@@ -1,198 +1,243 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using System.Linq; // Necesario para el OrderBy
+using System.Linq;
 
 public class V0HANDCONTROL : MonoBehaviour
 {
-    // References
-    public V0HANDMOVE V0HANDMOVE;
-    public InputActionAsset inputActionsAsset;
-    public Transform puntoDeAgarre;
-    public Transform puntaDeLaGarra;
-    
+    // References--------------------------------------------------------------------------------------------------------------
+    [SerializeField] private V0HANDMOVE _handMove;
+    [SerializeField] private InputActionAsset _inputActionsAsset;
+    [SerializeField] private Transform _puntoDeAgarre;
+    [SerializeField] private Transform _puntaDeLaGarra;
+
     [Header("Raycast Settings")]
     [Tooltip("Dirección del raycast relativa a la punta de la garra")]
-    public Vector3 direccionRayo = Vector3.forward;
-    
+    [SerializeField] private Vector3 _direccionRayo = Vector3.forward;
+
     [Tooltip("Distancia máxima del raycast")]
-    public float distanciaRango = 1.0f;
-    
+    [SerializeField] private float _distanciaRango = 1.0f;
+
     [Tooltip("LayerMask para filtrar objetos")]
-    public LayerMask layerMask = ~0; // Por defecto detecta todo
-    
+    [SerializeField] private LayerMask _layerMask = ~0;
+
     [Tooltip("Velocidad de rotación de los dedos")]
-    public float rotationSpeed = 90f;
-    
-    // Input Actions
-    private InputAction bone0;
-    private InputAction bone1;
-    private InputAction bone2;
-    private InputAction bone3;
-    private InputAction bone4;
-    private InputAction resetAction;
-    private InputAction agarrarAction;
-    private InputActionMap handMap;
-    
-    // State
-    private float[] boneAngles = new float[5];
-    public bool agarrando { get; private set; } = false;
-    private GameObject objetoAgarrado;
-    private Collider[] collidersMano; // Para ignorar auto-colisiones
+    [SerializeField] private float _rotationSpeed = 90f;
 
-    void Awake()
+    // Input Actions-----------------------------------------------------------------------------------------------------------
+    private InputAction _bone0, _bone1, _bone2, _bone3, _bone4, _resetAction, _agarrarAction;
+    private InputActionMap _handMap;
+
+    // State -----------------------------------------------------------------------------------------------------------
+    private float[] _boneAngles = new float[5];
+    private bool _agarrando = false;
+    private GameObject _objetoAgarrado;
+    private Collider[] _collidersMano;
+
+    public bool Agarrando => _agarrando;
+
+    ///-----------------------------------------------------------------------------------
+    private void Awake()
     {
-        // Validación de referencias
-        if (V0HANDMOVE == null) Debug.LogError("V0HANDMOVE reference is not assigned!", this);
-        if (inputActionsAsset == null) Debug.LogError("InputActionAsset is not assigned!", this);
-        if (puntoDeAgarre == null) Debug.LogError("PuntoDeAgarre transform is not assigned!", this);
-        if (puntaDeLaGarra == null) Debug.LogError("PuntaDeLaGarra transform is not assigned!", this);
-
-        // Obtener todos los colliders de la mano/brazo
-        collidersMano = GetComponentsInChildren<Collider>();
-
-        // Configuración de inputs
-        handMap = inputActionsAsset.FindActionMap("HandMap");
-        if (handMap == null)
-        {
-            Debug.LogError("Could not find HandMap in InputActionAsset!", this);
-            return;
-        }
-
-        bone0 = handMap.FindAction("Bone0");
-        bone1 = handMap.FindAction("Bone1");
-        bone2 = handMap.FindAction("Bone2");
-        bone3 = handMap.FindAction("Bone3");
-        bone4 = handMap.FindAction("Bone4");
-        resetAction = handMap.FindAction("Reset");
-        agarrarAction = handMap.FindAction("Agarrar");
+        ValidateReferences();
+        _collidersMano = GetComponentsInChildren<Collider>();
+        SetupInputActions();
     }
 
-    void OnEnable() => handMap?.Enable();
-    
-    void OnDisable()
+    private void ValidateReferences()
     {
-        handMap?.Disable();
-        if (agarrando) SoltarObjeto();
+        Debug.Assert(_handMove != null, "V0HANDMOVE reference is not assigned!", this);
+        Debug.Assert(_inputActionsAsset != null, "InputActionAsset is not assigned!", this);
+        Debug.Assert(_puntoDeAgarre != null, "PuntoDeAgarre transform is not assigned!", this);
+        Debug.Assert(_puntaDeLaGarra != null, "PuntaDeLaGarra transform is not assigned!", this);
     }
 
-    void Update()
+    private void SetupInputActions()
     {
-        // Visualización del raycast
-        if (puntaDeLaGarra != null)
-        {
-            Vector3 dir = puntaDeLaGarra.TransformDirection(direccionRayo.normalized);
-            Debug.DrawRay(puntaDeLaGarra.position, dir * distanciaRango, Color.green);
-        }
+        _handMap = _inputActionsAsset.FindActionMap("HandMap");
+        Debug.Assert(_handMap != null, "Could not find HandMap in InputActionAsset!", this);
 
-        // Procesar rotaciones de huesos
-        ProcessBoneRotation(bone0, 0);
-        ProcessBoneRotation(bone1, 1);
-        ProcessBoneRotation(bone2, 2);
-        ProcessBoneRotation(bone3, 3);
-        ProcessBoneRotation(bone4, 4);
-
-        // Reset hand position
-        if (resetAction?.triggered ?? false)
-        {
-            V0HANDMOVE.ResetHand();
-            boneAngles = new float[5];
-        }
-
-        // Handle grab action
-        if (agarrarAction?.triggered ?? false)
-        {
-            if (agarrando)
-                SoltarObjeto();
-            else
-                IntentarAgarrarObjetoConRaycast();
-        }
+        _bone0 = _handMap.FindAction("Bone0");
+        _bone1 = _handMap.FindAction("Bone1");
+        _bone2 = _handMap.FindAction("Bone2");
+        _bone3 = _handMap.FindAction("Bone3");
+        _bone4 = _handMap.FindAction("Bone4");
+        _resetAction = _handMap.FindAction("Reset");
+        _agarrarAction = _handMap.FindAction("Agarrar");
     }
 
-    private void ProcessBoneRotation(InputAction action, int boneIndex)
+    private void OnEnable() => _handMap?.Enable();
+
+    private void OnDisable()
+    {
+        _handMap?.Disable();
+        if (_agarrando) SoltarObjeto();
+    }
+
+    private void Update()
+    {
+        DrawDebugRay();
+        ProcessBoneRotations();
+        HandleResetAction();
+        HandleGrabAction();
+    }
+
+    private void DrawDebugRay()
+    {
+        if (_puntaDeLaGarra == null) return;
+
+        Vector3 dir = _puntaDeLaGarra.TransformDirection(_direccionRayo.normalized);
+        Debug.DrawRay(_puntaDeLaGarra.position, dir * _distanciaRango, Color.green);
+    }
+
+    private void ProcessBoneRotations()
+    {
+        ProcessSingleBoneRotation(_bone0, 0);
+        ProcessSingleBoneRotation(_bone1, 1);
+        ProcessSingleBoneRotation(_bone2, 2);
+        ProcessSingleBoneRotation(_bone3, 3);
+        ProcessSingleBoneRotation(_bone4, 4);
+    }
+
+    private void ProcessSingleBoneRotation(InputAction action, int boneIndex)
     {
         if (action == null) return;
-        
+
         float input = action.ReadValue<float>();
         if (Mathf.Abs(input) > 0.1f)
         {
-            boneAngles[boneIndex] += input * rotationSpeed * Time.deltaTime;
-            V0HANDMOVE.RotateBone(boneIndex, boneAngles[boneIndex]);
+            _boneAngles[boneIndex] += input * _rotationSpeed * Time.deltaTime;
+            _handMove.RotateBone(boneIndex, _boneAngles[boneIndex]);
         }
     }
 
-    void IntentarAgarrarObjetoConRaycast()
+    private void HandleResetAction()
     {
-        if (puntaDeLaGarra == null) return;
-        
-        Vector3 origen = puntaDeLaGarra.position;
-        Vector3 direccion = puntaDeLaGarra.TransformDirection(direccionRayo.normalized);
+        if (_resetAction?.triggered ?? false)
+        {
+            _handMove.ResetHand();
+            _boneAngles = new float[5];
+        }
+    }
 
-        // Opción 1: RaycastAll ordenado por distancia
-        RaycastHit[] hits = Physics.RaycastAll(origen, direccion, distanciaRango, layerMask)
+    private void HandleGrabAction()
+    {
+        if (!(_agarrarAction?.triggered ?? false)) return;
+
+        if (_agarrando)
+            SoltarObjeto();
+        else
+            IntentarAgarrarObjetoConRaycast();
+    }
+
+    private void IntentarAgarrarObjetoConRaycast()
+    {
+        if (_puntaDeLaGarra == null) return;
+
+        Vector3 origen = _puntaDeLaGarra.position;
+        Vector3 direccion = _puntaDeLaGarra.TransformDirection(_direccionRayo.normalized);
+
+        var hit = FindNearestGrabbableObject(origen, direccion);
+        if (hit.HasValue) // Verificar si hay un hit válido
+        {
+            AgarrarObjeto(hit.Value.collider.gameObject); // Acceder al Value del nullable
+        }
+        else
+        {
+            Debug.Log("No se detectó ningún objeto agarrable");
+        }
+    }
+
+    private RaycastHit? FindNearestGrabbableObject(Vector3 origin, Vector3 direction)
+    {
+        // Usamos RaycastAll ordenado por distancia como primera opción
+        var hits = Physics.RaycastAll(origin, direction, _distanciaRango, _layerMask)
+            .Where(h => !_collidersMano.Contains(h.collider) && h.collider.CompareTag("Objeto"))
             .OrderBy(h => h.distance)
-            .ToArray();
+            .FirstOrDefault();
 
-        foreach (var hit in hits)
-        {
-            // Ignorar colliders de la propia mano
-            if (collidersMano.Contains(hit.collider)) continue;
-            
-            if (hit.collider.CompareTag("Objeto"))
-            {
-                AgarrarObjeto(hit.collider.gameObject);
-                return;
-            }
-        }
-
-        // Opción 2: Raycast simple (alternativa)
-        RaycastHit hitSimple;
-        if (Physics.Raycast(origen, direccion, out hitSimple, distanciaRango, layerMask))
-        {
-            if (!collidersMano.Contains(hitSimple.collider) && hitSimple.collider.CompareTag("Objeto"))
-            {
-                AgarrarObjeto(hitSimple.collider.gameObject);
-                return;
-            }
-        }
-
-        Debug.Log("No se detectó ningún objeto agarrable");
+        return hits.collider != null ? hits : (RaycastHit?)null;
     }
-
-    void AgarrarObjeto(GameObject objeto)
+    private void AgarrarObjeto(GameObject objeto)
     {
-        if (objeto == null || puntoDeAgarre == null) return;
-        
-        // Configurar física
+        if (objeto == null || _puntoDeAgarre == null) return;
+
+        // Desactivar completamente la física del objeto
         if (objeto.TryGetComponent<Rigidbody>(out var rb))
         {
             rb.isKinematic = true;
-            rb.interpolation = RigidbodyInterpolation.Interpolate;
+            rb.interpolation = RigidbodyInterpolation.None; // Cambiado a None para mejor sincronización
+            rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
         }
-        
-        objetoAgarrado = objeto;
-        objetoAgarrado.transform.SetParent(puntoDeAgarre);
-        objetoAgarrado.transform.localPosition = Vector3.zero;
-        objetoAgarrado.transform.localRotation = Quaternion.identity;
-        
-        agarrando = true;
+
+        // Desactivar colisiones temporales
+        foreach (var collider in objeto.GetComponents<Collider>())
+        {
+            collider.enabled = false;
+        }
+
+        _objetoAgarrado = objeto;
+
+        // Configurar la transformación del objeto
+        _objetoAgarrado.transform.SetParent(_puntoDeAgarre);
+        _objetoAgarrado.transform.localPosition = Vector3.zero;
+        _objetoAgarrado.transform.localRotation = Quaternion.identity;
+
+        // Forzar una actualización inmediata
+        _objetoAgarrado.transform.hasChanged = true;
+
+        _agarrando = true;
         Debug.Log($"Objeto {objeto.name} agarrado correctamente");
     }
 
-    void SoltarObjeto()
+    private void SoltarObjeto()
     {
-        if (objetoAgarrado == null) return;
-        
-        // Restaurar física
-        if (objetoAgarrado.TryGetComponent<Rigidbody>(out var rb))
+        if (_objetoAgarrado == null) return;
+
+        // Restaurar configuración física
+        if (_objetoAgarrado.TryGetComponent<Rigidbody>(out var rb))
         {
             rb.isKinematic = false;
             rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+            rb.interpolation = RigidbodyInterpolation.Interpolate;
         }
-        
-        objetoAgarrado.transform.SetParent(null);
-        agarrando = false;
-        objetoAgarrado = null;
-        
+
+        // Reactivar colisiones
+        foreach (var collider in _objetoAgarrado.GetComponents<Collider>())
+        {
+            collider.enabled = true;
+        }
+
+        _objetoAgarrado.transform.SetParent(null);
+        _agarrando = false;
+        _objetoAgarrado = null;
+
         Debug.Log("Objeto soltado correctamente");
+    }
+
+    private void LateUpdate()
+    {
+        if (_agarrando && _objetoAgarrado != null)
+        {
+            // Forzar la actualización de la posición en cada frame
+            _objetoAgarrado.transform.position = _puntoDeAgarre.position;
+            _objetoAgarrado.transform.rotation = _puntoDeAgarre.rotation;
+        }
+    }
+
+    private void ConfigureRigidbody(GameObject obj, bool isKinematic)
+    {
+        if (obj.TryGetComponent<Rigidbody>(out var rb))
+        {
+            rb.isKinematic = isKinematic;
+            if (isKinematic)
+            {
+                rb.interpolation = RigidbodyInterpolation.Interpolate;
+            }
+            else
+            {
+                rb.linearVelocity = Vector3.zero;
+            }
+        }
     }
 }
