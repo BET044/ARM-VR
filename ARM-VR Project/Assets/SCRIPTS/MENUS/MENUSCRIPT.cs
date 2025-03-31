@@ -28,7 +28,6 @@ public class MenuPrincipal : MonoBehaviour
         #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
         #else
-        Debug.log("SALIENDO")
         Application.Quit();
         #endif
     }
