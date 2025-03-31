@@ -15,6 +15,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Agarrar",
+                    "type": "Button",
+                    "id": "330dd53a-25ed-4a1a-8ba9-10cfffe7faa2",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Bone0",
                     "type": "Value",
                     "id": "3d75a8d1-a760-485f-836d-780def40c1d1",
@@ -80,6 +89,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "Reset",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d45fc7d4-9476-4d29-87a8-d243c9a395f8",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Agarrar",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "eb655b6d-45fe-44d8-8fcd-b9c5e2e9df84",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Agarrar",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
