@@ -5,6 +5,9 @@ using System.Linq;
 public class V0HANDCONTROL : MonoBehaviour
 {
     // References--------------------------------------------------------------------------------------------------------------
+    [SerializeField] private EvaluadorTarea evaluadorTarea;
+    [SerializeField] private Transform objetivoFinal;
+
     [SerializeField] private V0HANDMOVE _handMove;
     [SerializeField] private InputActionAsset _inputActionsAsset;
     [SerializeField] private Transform _puntoDeAgarre;
@@ -187,11 +190,13 @@ public class V0HANDCONTROL : MonoBehaviour
 
         _agarrando = true;
         Debug.Log($"Objeto {objeto.name} agarrado correctamente");
+        evaluadorTarea?.IniciarTarea(objeto, objetivoFinal);
     }
 
     private void SoltarObjeto()
     {
         if (_objetoAgarrado == null) return;
+        evaluadorTarea?.FinalizarTarea();
 
         // Restaurar configuración física
         if (_objetoAgarrado.TryGetComponent<Rigidbody>(out var rb))
