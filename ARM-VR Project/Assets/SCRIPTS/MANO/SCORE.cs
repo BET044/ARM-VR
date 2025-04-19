@@ -11,6 +11,9 @@ public class EvaluadorTarea : MonoBehaviour
     [Header("UI TMP")]
     [SerializeField] private TextMeshProUGUI tiempoTMP;
     [SerializeField] private TextMeshProUGUI resultadoTMP;
+    [SerializeField] private GameObject menuscore;
+    [SerializeField] private GameObject botonrojo;
+    [SerializeField] private GameObject botonver;
 
     [Header("Límite de tiempo opcional")]
     [SerializeField] private float tiempoLimite = 10f;
@@ -22,7 +25,7 @@ public class EvaluadorTarea : MonoBehaviour
         if (tareaActiva && tiempoTMP != null)
         {
             float tiempoActual = Time.time - tiempoInicio;
-            tiempoTMP.text = $"⏱ {tiempoActual:F2}s";
+            tiempoTMP.text = $"{tiempoActual:F2}s";
 
             if (tiempoActual > tiempoLimite)
                 tiempoTMP.color = colorAlerta;
@@ -40,7 +43,7 @@ public class EvaluadorTarea : MonoBehaviour
 
         if (tiempoTMP != null)
         {
-            tiempoTMP.text = "⏱ 0.00s";
+            tiempoTMP.text = "0.00s";
             tiempoTMP.color = colorNormal;
         }
 
@@ -56,7 +59,11 @@ public class EvaluadorTarea : MonoBehaviour
 
         if (resultadoTMP != null)
         {
-            resultadoTMP.text = $"✅ Tiempo: {tiempoTotal:F2}s\n🎯 Precisión: {precision:F3}u";
+            menuscore.SetActive(true);
+            botonrojo.SetActive(false);
+            botonver.SetActive(true);
+            tiempoTMP.text = "";
+            resultadoTMP.text = $"Tiempo: {tiempoTotal:F2}s\nPrecisión: {precision:F3}u";
         }
 
         Debug.Log($"Tarea finalizada.\nTiempo: {tiempoTotal:F2}s\nPrecisión: {precision:F3} unidades");
