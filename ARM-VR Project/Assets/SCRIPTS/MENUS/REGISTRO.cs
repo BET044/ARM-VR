@@ -6,19 +6,31 @@ using System.Text;
 
 public class REGISRO : MonoBehaviour
 {
+    [System.Serializable]
+    public class SignUpResponse
+    {
+        public string access_token;
+        public User user;
+    }
+
+    [System.Serializable]
+    public class User
+    {
+        public string id;
+    }
+
     public TMP_InputField emailInput;
     public TMP_InputField passwordInput;
     public TMP_InputField nameInput;
-    public TMP_Dropdown roleDropdown;  
+    public TMP_Dropdown roleDropdown;
     public TextMeshProUGUI statusText;
 
-    private string supabaseUrl = "https://hgnrgwruwxkdhhrpguou.supabase.co";  // Reemplaza con tu URL
-    private string apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnbnJnd3J1d3hrZGhocnBndW91Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM0NDQ0NDksImV4cCI6MjA1OTAyMDQ0OX0.WtiXzBIdQORbOWzOs3zBQgHR6Yr7MnC-q6ihZ1OT5fw"; // Reemplaza con tu API Key
+    private string supabaseUrl = "https://hgnrgwruwxkdhhrpguou.supabase.co";
+    private string apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnbnJnd3J1d3hrZGhocnBndW91Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM0NDQ0NDksImV4cCI6MjA1OTAyMDQ0OX0.WtiXzBIdQORbOWzOs3zBQgHR6Yr7MnC-q6ihZ1OT5fw";
 
     public void Register()
     {
-        // Obtener el rol seleccionado desde el dropdown
-        int selectedRole = roleDropdown.value + 1; 
+        int selectedRole = roleDropdown.value + 1;
         StartCoroutine(RegisterCoroutine(emailInput.text, passwordInput.text, nameInput.text, selectedRole));
     }
 
@@ -39,27 +51,28 @@ public class REGISRO : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                statusText.text = "✅ Usuario creado. Registrando en la BD...";
                 Debug.Log("Usuario registrado: " + request.downloadHandler.text);
 
-                // Extraer UID del usuario
-                string uid = ExtraerUID(request.downloadHandler.text);
+                SignUpResponse response = JsonUtility.FromJson<SignUpResponse>(request.downloadHandler.text);
+                string uid = response.user.id;
+                string accessToken = response.access_token;
 
-                // Guardar en la tabla "usuarios"
-                StartCoroutine(GuardarUsuarioBD(uid, nombre, email, rol_id));
+                statusText.text = "Usuario creado. Guardando en la base de datos...";
+                StartCoroutine(GuardarUsuarioBD(uid, nombre, email, rol_id, accessToken));
             }
             else
             {
-                statusText.text = "❌ Error: " + request.error;
+                statusText.text = "Error al crear usuario: " + request.error;
                 Debug.LogError("Error: " + request.error);
             }
         }
     }
 
-    IEnumerator GuardarUsuarioBD(string uid, string nombre, string email, int rol_id)
+    IEnumerator GuardarUsuarioBD(string uid, string nombre, string email, int rol_id, string token)
     {
         string jsonData = "{\"id\":\"" + uid + "\", \"nombre\":\"" + nombre + "\", \"correo\":\"" + email + "\", \"rol_id\":" + rol_id + "}";
         byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
+        Debug.Log("Enviando a BD: " + jsonData);
 
         using (UnityWebRequest request = new UnityWebRequest(supabaseUrl + "/rest/v1/usuarios", "POST"))
         {
@@ -67,28 +80,21 @@ public class REGISRO : MonoBehaviour
             request.downloadHandler = new DownloadHandlerBuffer();
             request.SetRequestHeader("Content-Type", "application/json");
             request.SetRequestHeader("apikey", apiKey);
-            request.SetRequestHeader("Authorization", "Bearer " + apiKey); // Necesario para escribir en la BD
+            request.SetRequestHeader("Authorization", "Bearer " + token);
 
             yield return request.SendWebRequest();
 
             if (request.result == UnityWebRequest.Result.Success)
             {
-                statusText.text = "✅ Usuario registrado correctamente en la BD";
+                statusText.text = "Usuario registrado correctamente en la base de datos.";
+                Debug.Log("Registro en BD exitoso.");
             }
             else
             {
-                statusText.text = "❌ Error al guardar en BD: " + request.error;
+                statusText.text = "Error al guardar en BD: " + request.error;
                 Debug.LogError("Error en BD: " + request.error);
+                Debug.LogError("Respuesta: " + request.downloadHandler.text);
             }
         }
-    }
-
-    string ExtraerUID(string jsonResponse)
-    {
-        // Buscar y extraer el "id" de la respuesta JSON (puede usarse una librería JSON como Newtonsoft)
-        int index = jsonResponse.IndexOf("\"id\":\"") + 6;
-        if (index < 6) return "";
-        int endIndex = jsonResponse.IndexOf("\"", index);
-        return jsonResponse.Substring(index, endIndex - index);
     }
 }
