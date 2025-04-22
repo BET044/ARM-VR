@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 using TMPro;
 using System.Collections;
 using System.Text;
@@ -59,6 +60,12 @@ public class REGISRO : MonoBehaviour
 
                 statusText.text = "Usuario creado. Guardando en la base de datos...";
                 StartCoroutine(GuardarUsuarioBD(uid, nombre, email, rol_id, accessToken));
+                
+                statusText.text = "Login exitoso";
+                Debug.Log("Respuesta: " + request.downloadHandler.text);
+                PlayerPrefs.SetString("session_data", request.downloadHandler.text);
+
+                SceneManager.LoadScene("MENU MAIN");
             }
             else
             {
