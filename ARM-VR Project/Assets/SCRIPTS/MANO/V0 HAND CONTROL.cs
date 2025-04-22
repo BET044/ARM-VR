@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class V0HANDCONTROL : MonoBehaviour
 {
@@ -130,6 +131,7 @@ private void ResetHandImmediately()
         {
             _handMove.ResetHand();
             _boneAngles = new float[5];
+            SceneManager.LoadScene("ARM ESCENE");
         }
     }
 

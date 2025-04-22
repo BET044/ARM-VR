@@ -1333,7 +1333,7 @@ GameObject:
   m_Component:
   - component: {fileID: 609105958}
   m_Layer: 5
-  m_Name: REGRESAR
+  m_Name: REGRESAR A VR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1565,7 +1565,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   escenaNiveles: ARM ESCENE
   escenaOpciones: Opciones
-  escenaPerfil: MAIN MENU
+  escenaPerfil: MENU MAIN
+  mensaje: {fileID: 0}
 --- !u!1 &1013692663
 GameObject:
   m_ObjectHideFlags: 0
