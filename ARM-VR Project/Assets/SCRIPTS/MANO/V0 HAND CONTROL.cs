@@ -40,23 +40,25 @@ public class V0HANDCONTROL : MonoBehaviour
     public bool Agarrando => _agarrando;
 
     ///-----------------------------------------------------------------------------------
+    /// 
+    /// 
+    /// 
+    /// 
     private void Awake()
     {
         ValidateReferences();
         _collidersMano = GetComponentsInChildren<Collider>();
         SetupInputActions();
         // Resetear la mano al iniciar
-        ResetHandImmediately();
+        //ResetHandImmediately();
         
     }
-
-
-    
-private void ResetHandImmediately()
-{
-    _handMove?.ResetHand();
-    _boneAngles = new float[5];
-}
+        
+    private void ResetHandImmediately()
+    {
+        _handMove?.ResetHand();
+        _boneAngles = new float[5];
+    }
 
     private void ValidateReferences()
     {

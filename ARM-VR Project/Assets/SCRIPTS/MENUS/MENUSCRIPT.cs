@@ -6,27 +6,31 @@ using System.Collections;
 
 public class MenuPrincipal : MonoBehaviour
 {
-   
     public string escenaNiveles = "Niveles";
     public string escenaOpciones = "Opciones";
     public string escenaPerfil = "Perfil";
     public TextMeshProUGUI mensaje;
-
-    // Supabase
+    public TextMeshProUGUI mensaje2;
     private string supabaseUrl = "https://hgnrgwruwxkdhhrpguou.supabase.co"; 
     private string apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnbnJnd3J1d3hrZGhocnBndW91Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM0NDQ0NDksImV4cCI6MjA1OTAyMDQ0OX0.WtiXzBIdQORbOWzOs3zBQgHR6Yr7MnC-q6ihZ1OT5fw";
+
+    private string userId;
+    private string accessToken;
+    private float tiempoInicioSesion;
+
 
     void Start()
     {
         if (PlayerPrefs.HasKey("session_data"))
         {
             string sessionData = PlayerPrefs.GetString("session_data");
-            string userId = ExtraerValor(sessionData, "\"id\":\"");
-            string accessToken = ExtraerValor(sessionData, "\"access_token\":\"");
+            userId = ExtraerValor(sessionData, "\"id\":\"");
+            accessToken = ExtraerValor(sessionData, "\"access_token\":\"");
 
             if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(accessToken))
             {
                 StartCoroutine(ObtenerNombreUsuario(userId, accessToken));
+                StartCoroutine(RegistrarSesion(userId, accessToken));
             }
             else
             {
@@ -42,7 +46,6 @@ public class MenuPrincipal : MonoBehaviour
     IEnumerator ObtenerNombreUsuario(string userId, string token)
     {
         string url = $"{supabaseUrl}/rest/v1/usuarios?select=nombre&id=eq.{userId}";
-
         UnityWebRequest request = UnityWebRequest.Get(url);
         request.SetRequestHeader("apikey", apiKey);
         request.SetRequestHeader("Authorization", "Bearer " + token);
@@ -62,6 +65,69 @@ public class MenuPrincipal : MonoBehaviour
             mensaje.text = "¡Bienvenido, Usuario!";
         }
     }
+    IEnumerator RegistrarSesion(string userId, string token)
+    {
+        string url = $"{supabaseUrl}/rest/v1/sesiones";
+        string jsonData = $"{{\"usuario_id\":\"{userId}\",\"estado\":\"en progreso\",\"duracion\":0}}";
+
+        UnityWebRequest request = new UnityWebRequest(url, "POST");
+        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+        request.SetRequestHeader("apikey", apiKey);
+        request.SetRequestHeader("Authorization", "Bearer " + token);
+        request.SetRequestHeader("Prefer", "return=representation");  // <- esta línea es clave
+
+        yield return request.SendWebRequest();
+
+        string response = request.downloadHandler.text;
+        Debug.Log("Respuesta completa del servidor: " + response);
+
+        string cleanedResponse = response.Trim('[', ']');
+        string sesionId = ExtraerValor(cleanedResponse, "\"id\":");
+
+        if (!string.IsNullOrEmpty(sesionId))
+        {
+            PlayerPrefs.SetString("sesion_id", sesionId);
+            tiempoInicioSesion = Time.realtimeSinceStartup;
+            Debug.Log("Sesión iniciada: " + sesionId);
+        }
+        else
+        {
+            Debug.LogError("No se encontró el ID de la sesión en la respuesta.");
+        }
+    }
+
+    IEnumerator RegistrarFinSesion()
+    {
+        string sesionId = PlayerPrefs.GetString("sesion_id");
+        if (string.IsNullOrEmpty(sesionId)) yield break;
+
+        int duracion = Mathf.RoundToInt(Time.realtimeSinceStartup - tiempoInicioSesion);
+        string url = $"{supabaseUrl}/rest/v1/sesiones?id=eq.{sesionId}";
+        string jsonData = $"{{\"estado\":\"completada\",\"fecha\":\"now()\",\"duracion\":{duracion}}}";
+
+        UnityWebRequest request = new UnityWebRequest(url, "PATCH");
+        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
+        request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+        request.SetRequestHeader("apikey", apiKey);
+        request.SetRequestHeader("Authorization", "Bearer " + accessToken);
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log("Sesión finalizada correctamente");
+        }
+        else
+        {
+            Debug.LogError("Error al finalizar sesión: " + request.error);
+        }
+    }
+
 
     string ExtraerValor(string texto, string clave)
     {
@@ -69,7 +135,7 @@ public class MenuPrincipal : MonoBehaviour
         if (inicio == -1) return null;
 
         inicio += clave.Length;
-        int fin = texto.IndexOf("\"", inicio);
+        int fin = texto.IndexOfAny(new char[] { ',', '\"', '}' }, inicio);
         return texto.Substring(inicio, fin - inicio);
     }
 
@@ -90,10 +156,12 @@ public class MenuPrincipal : MonoBehaviour
 
     public void BotonSalir()
     {
+        StartCoroutine(RegistrarFinSesion());
         PlayerPrefs.DeleteKey("access_token");
         PlayerPrefs.DeleteKey("user_id");
         PlayerPrefs.DeleteKey("user_email");
         PlayerPrefs.DeleteKey("session_data");
+        PlayerPrefs.DeleteKey("sesion_id");
 
         Debug.Log("Sesión cerrada.");
         #if UNITY_EDITOR
@@ -101,5 +169,13 @@ public class MenuPrincipal : MonoBehaviour
         #else
         Application.Quit();
         #endif
+    }
+
+    void OnApplicationQuit()
+    {
+        if (!string.IsNullOrEmpty(userId) && PlayerPrefs.HasKey("sesion_id"))
+        {
+            StartCoroutine(RegistrarFinSesion());
+        }
     }
 }
