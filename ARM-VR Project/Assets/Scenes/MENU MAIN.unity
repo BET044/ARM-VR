@@ -685,11 +685,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d28afb58727fe46489bb3a665a14d60e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  escenaNiveles: ARM ESCENE
+  escenaNiveles: TAREAS MENU
   escenaOpciones: Opciones
   escenaPerfil: Perfil
   mensaje: {fileID: 1339341383}
-  mensaje2: {fileID: 0}
+  mensaje2: {fileID: 982993055}
 --- !u!1 &373240002
 GameObject:
   m_ObjectHideFlags: 0
@@ -1331,7 +1331,7 @@ GameObject:
   - component: {fileID: 982993056}
   - component: {fileID: 982993055}
   m_Layer: 5
-  m_Name: BIENVENIDO (1)
+  m_Name: SESION
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1376,7 +1376,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: BIENVENIDO
+  m_text: '
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: c0e7c7a0a1e452c4c881d5cdb14ffc5b, type: 2}
