@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
 using TMPro;
 using System.Collections;
+using System.Security.Cryptography;
 
 public class MenuPrincipal : MonoBehaviour
 {
@@ -19,7 +20,7 @@ public class MenuPrincipal : MonoBehaviour
     private float tiempoInicioSesion;
 
 
-    void Start()
+        void Start()
     {
         if (PlayerPrefs.HasKey("session_data"))
         {
@@ -30,7 +31,20 @@ public class MenuPrincipal : MonoBehaviour
             if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(accessToken))
             {
                 StartCoroutine(ObtenerNombreUsuario(userId, accessToken));
-                StartCoroutine(RegistrarSesion(userId, accessToken));
+
+                // Verifica si ya existe un sesion_id
+                string sesionId = PlayerPrefs.GetString("sesion_id");
+                if (string.IsNullOrEmpty(sesionId))
+                {
+                    // Si no hay un sesion_id, entonces crea una nueva sesión
+                    StartCoroutine(RegistrarSesion(userId, accessToken));
+                }
+                else
+                {
+                    // Si ya hay un sesion_id, muestra un mensaje de que la sesión ya está activa
+                    Debug.Log("Sesión activa encontrada: " + sesionId);
+                    mensaje2.text = "Sesión activa: " + sesionId;
+                }
             }
             else
             {
@@ -92,6 +106,7 @@ public class MenuPrincipal : MonoBehaviour
             PlayerPrefs.SetString("sesion_id", sesionId);
             tiempoInicioSesion = Time.realtimeSinceStartup;
             Debug.Log("Sesión iniciada: " + sesionId);
+            mensaje2.text = "Sesión iniciada: " + sesionId;
         }
         else
         {
