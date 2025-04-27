@@ -20,28 +20,48 @@ public class MenuPrincipal : MonoBehaviour
     private float tiempoInicioSesion;
 
 
-        void Start()
+    void Start()
     {
+        // Verificar primero si tenemos session_data
         if (PlayerPrefs.HasKey("session_data"))
         {
             string sessionData = PlayerPrefs.GetString("session_data");
-            userId = ExtraerValor(sessionData, "\"id\":\"");
-            accessToken = ExtraerValor(sessionData, "\"access_token\":\"");
+            
+            // Extraer user_id y access_token de los PlayerPrefs directamente
+            userId = PlayerPrefs.GetString("user_id");
+            accessToken = PlayerPrefs.GetString("access_token");
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                // Si no está en PlayerPrefs, intentar extraer de session_data
+                userId = ExtraerValor(sessionData, "\"id\":\"");
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    PlayerPrefs.SetString("user_id", userId);
+                }
+            }
+
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                accessToken = ExtraerValor(sessionData, "\"access_token\":\"");
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    PlayerPrefs.SetString("access_token", accessToken);
+                }
+            }
 
             if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(accessToken))
             {
                 StartCoroutine(ObtenerNombreUsuario(userId, accessToken));
 
-                // Verifica si ya existe un sesion_id
+                // Verificar y crear sesión si es necesario
                 string sesionId = PlayerPrefs.GetString("sesion_id");
                 if (string.IsNullOrEmpty(sesionId))
                 {
-                    // Si no hay un sesion_id, entonces crea una nueva sesión
                     StartCoroutine(RegistrarSesion(userId, accessToken));
                 }
                 else
                 {
-                    // Si ya hay un sesion_id, muestra un mensaje de que la sesión ya está activa
                     Debug.Log("Sesión activa encontrada: " + sesionId);
                     mensaje2.text = "Sesión activa: " + sesionId;
                 }
@@ -49,6 +69,7 @@ public class MenuPrincipal : MonoBehaviour
             else
             {
                 mensaje.text = "¡Bienvenido, Usuario!";
+                Debug.LogWarning("No se pudo obtener user_id o access_token");
             }
         }
         else
@@ -56,7 +77,6 @@ public class MenuPrincipal : MonoBehaviour
             mensaje.text = "¡Bienvenido, Invitado!";
         }
     }
-
     IEnumerator ObtenerNombreUsuario(string userId, string token)
     {
         string url = $"{supabaseUrl}/rest/v1/usuarios?select=nombre&id=eq.{userId}";
