@@ -57,9 +57,30 @@ public class LOGIN : MonoBehaviour
 
             if (request.result == UnityWebRequest.Result.Success || request.responseCode == 200)
             {
-                Debug.Log("Login exitoso: " + request.downloadHandler.text);
-                PlayerPrefs.SetString("session_data", request.downloadHandler.text);
-                // Cargar la siguiente escena
+                string response = request.downloadHandler.text;
+                Debug.Log("Login exitoso: " + response);
+                
+                // Guardar toda la sesión
+                PlayerPrefs.SetString("session_data", response);
+                
+                // Extraer y guardar específicamente el user_id
+                string userId = ExtraerValor(response, "\"id\":\"");
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    PlayerPrefs.SetString("user_id", userId);
+                }
+                
+                // Extraer y guardar el access token
+                string accessToken = ExtraerValor(response, "\"access_token\":\"");
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    PlayerPrefs.SetString("access_token", accessToken);
+                }
+                
+                PlayerPrefs.Save();
+                Debug.Log($"User ID: {PlayerPrefs.GetString("user_id")}");
+                Debug.Log($"Access Token: {PlayerPrefs.GetString("access_token")}");
+                Debug.Log($"Session Data: {PlayerPrefs.GetString("session_data")}");
                 SceneManager.LoadScene("MENU MAIN");
             }
             else
@@ -69,6 +90,17 @@ public class LOGIN : MonoBehaviour
                 statusText.text = "Error al iniciar sesión";
             }
         }
+    }
+
+    // Método para extraer valores del JSON
+    string ExtraerValor(string texto, string clave)
+    {
+        int inicio = texto.IndexOf(clave);
+        if (inicio == -1) return null;
+
+        inicio += clave.Length;
+        int fin = texto.IndexOfAny(new char[] { ',', '\"', '}' }, inicio);
+        return texto.Substring(inicio, fin - inicio);
     }
     
         public void BotonInvitado()
