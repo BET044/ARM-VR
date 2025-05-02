@@ -50,7 +50,7 @@ public class V0HANDCONTROL : MonoBehaviour
         _collidersMano = GetComponentsInChildren<Collider>();
         SetupInputActions();
         // Resetear la mano al iniciar
-        //ResetHandImmediately();
+        ResetHandImmediately();
         
     }
         

@@ -21,6 +21,7 @@ public class EvaluadorTarea : MonoBehaviour
     [Header("UI TMP")]
     [SerializeField] private TextMeshProUGUI tiempoTMP;
     [SerializeField] private TextMeshProUGUI resultadoTMP;
+    [SerializeField] private TextMeshProUGUI TESTDEBUG;
     [SerializeField] private GameObject menuscore;
     [SerializeField] private GameObject botonrojo;
     [SerializeField] private GameObject botonver;
@@ -91,7 +92,7 @@ public class EvaluadorTarea : MonoBehaviour
             botonver.SetActive(true);
             tiempoTMP.text = "";
 
-            string resultadoTexto = tareaCompletada ? "¡Tarea completada exitosamente!" : "No se cumplió el objetivo.";
+            string resultadoTexto = tareaCompletada ? "¡Tarea completada exitosamente!" : "No se cumplió el objetivo.\n";
             resultadoTMP.text = $"Tiempo: {tiempoTotal:F2}s\nPrecisión: {precision:F3}u\n\n{resultadoTexto}";
         }
 
@@ -173,11 +174,14 @@ public class EvaluadorTarea : MonoBehaviour
         if (request.result == UnityWebRequest.Result.Success)
         {
             Debug.Log("Resultado registrado correctamente en resultados_tareas.");
+            TESTDEBUG.text =  "Resultado registrado correctamente en resultados_tareas.";
         }
         else
         {
             Debug.LogError("Error al registrar resultado: " + request.error);
             Debug.LogError("Respuesta servidor: " + request.downloadHandler.text);
+            TESTDEBUG.text =  "Error al registrar resultado: " + request.error + request.downloadHandler.text;
+            
         }
     }
 
