@@ -14,7 +14,7 @@ public class VisualizadorTareas : MonoBehaviour
 
     private string supabaseUrl = "https://hgnrgwruwxkdhhrpguou.supabase.co"; 
     private string apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnbnJnd3J1d3hrZGhocnBndW91Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM0NDQ0NDksImV4cCI6MjA1OTAyMDQ0OX0.WtiXzBIdQORbOWzOs3zBQgHR6Yr7MnC-q6ihZ1OT5fw";
-    private
+
 
     void Start()
     {

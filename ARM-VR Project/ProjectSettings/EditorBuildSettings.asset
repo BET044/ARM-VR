@@ -17,6 +17,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/TAREAS MENU.unity
     guid: 410b189a35ff5b54398cb1c6cd12e869
+  - enabled: 1
+    path: Assets/Scenes/LEADERBOARD.unity
+    guid: c6bdf0294bb552346a75f5ca7d08e3b1
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
