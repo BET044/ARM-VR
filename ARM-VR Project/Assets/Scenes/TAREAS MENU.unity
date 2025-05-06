@@ -3172,9 +3172,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd8f44663fe644644914849ce66eb192, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  escena1: escena1
-  escena2: escena2
-  escena3: ARM ESCENE
+  escena1: LVL1
+  escena2: ARM ESCENE
+  escena3: LVL3
 --- !u!1 &1572589014
 GameObject:
   m_ObjectHideFlags: 0
@@ -3333,9 +3333,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: LOGIN, Assembly-CSharp
-        m_MethodName: Login
+      - m_Target: {fileID: 1532713716}
+        m_TargetAssemblyTypeName: MenuControl, Assembly-CSharp
+        m_MethodName: Boton2
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3541,9 +3541,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: LOGIN, Assembly-CSharp
-        m_MethodName: Login
+      - m_Target: {fileID: 1532713716}
+        m_TargetAssemblyTypeName: MenuControl, Assembly-CSharp
+        m_MethodName: Boton1
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
