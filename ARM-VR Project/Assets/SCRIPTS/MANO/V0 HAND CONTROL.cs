@@ -13,6 +13,9 @@ public class V0HANDCONTROL : MonoBehaviour
     [SerializeField] private InputActionAsset _inputActionsAsset;
     [SerializeField] private Transform _puntoDeAgarre;
     [SerializeField] private Transform _puntaDeLaGarra;
+    [Header("Configuración Tutorial")]
+    [SerializeField] private bool esTutorial = false;
+    [SerializeField] private TutorialBrazoMecanico tutorialController;
 
     [Header("Raycast Settings")]
     [Tooltip("Dirección del raycast relativa a la punta de la garra")]
@@ -205,7 +208,14 @@ public class V0HANDCONTROL : MonoBehaviour
 
         _agarrando = true;
         Debug.Log($"Objeto {objeto.name} agarrado correctamente");
-        evaluadorTarea?.IniciarTarea(objeto, objetivoFinal);
+        if (!esTutorial)
+        {
+            evaluadorTarea?.IniciarTarea(objeto, objetivoFinal);
+        }
+        else if (tutorialController != null)
+        {
+            //asddassdadas
+        }
     }
 
     private void SoltarObjeto()
