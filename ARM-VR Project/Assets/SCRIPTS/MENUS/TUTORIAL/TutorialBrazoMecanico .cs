@@ -17,12 +17,13 @@ public class TutorialBrazoMecanico : MonoBehaviour
     [SerializeField] private Button botonSiguiente;
     [SerializeField] private Button botonFinalizar;
     [SerializeField] private Button botonComenzarPractica; // Nuevo botón
+    [SerializeField] private TextMeshProUGUI mensajeFinalTMP;
+    [SerializeField] private TextMeshProUGUI debugTMP;
 
     [Header("Configuración")]
     [SerializeField] private bool permitirPractica = false;
 
     private int pasoActual = 0;
-    private bool tutorialActivo = false;
 
     private void Start()
     {
@@ -34,6 +35,9 @@ public class TutorialBrazoMecanico : MonoBehaviour
         // Estado inicial
         controlBrazo.enabled = true;
         botonComenzarPractica.gameObject.SetActive(false);
+        mensajeFinalTMP.text = "";
+        debugTMP.text = "";
+
         MostrarPanelInicial();
     }
 
@@ -103,8 +107,7 @@ public class TutorialBrazoMecanico : MonoBehaviour
         //imagenAyuda.sprite = spritesInstrucciones[5];
         botonComenzarPractica.gameObject.SetActive(false);
         botonFinalizar.gameObject.SetActive(true);
-        tutorialActivo = true;
-        
+                
         if(objetoParaAgarrar != null)
         {
             objetoParaAgarrar.SetActive(true);
@@ -116,7 +119,20 @@ public class TutorialBrazoMecanico : MonoBehaviour
         panelTutorial.SetActive(false);
         controlBrazo.enabled = true;
         
+        mensajeFinalTMP.text = "Tutorial completado correctamente";
+        debugTMP.text = "";
+
         Debug.Log("Tutorial completado");
+        var evaluador = Object.FindFirstObjectByType<EvaluadorTutorial>();
+        if (evaluador != null)
+        {
+            evaluador.RegistrarTutorial(mensajeFinalTMP, debugTMP);
+        }
+        else
+        {
+            debugTMP.text = "No se encontró EvaluadorTutorial en la escena.";
+        }
+
     }
 
     // Eliminado el Update ya que no se necesita temporizador

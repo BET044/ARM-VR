@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.Networking;
 using System.Collections;
+using System.Globalization;
 
 public class EvaluadorTarea : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class EvaluadorTarea : MonoBehaviour
 
     [Header("Datos de Supabase")]
     [SerializeField] private int tareaId;
-    private string supabaseUrl = "https://hgnrgwruwxkdhhrpguou.supabase.co"; 
+    private string supabaseUrl = "https://hgnrgwruwxkdhhrpguou.supabase.co";
     private string apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhnbnJnd3J1d3hrZGhocnBndW91Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM0NDQ0NDksImV4cCI6MjA1OTAyMDQ0OX0.WtiXzBIdQORbOWzOs3zBQgHR6Yr7MnC-q6ihZ1OT5fw";
     private string accessToken;
     private string userId;
@@ -28,7 +29,7 @@ public class EvaluadorTarea : MonoBehaviour
 
     [Header("Límite de tiempo opcional")]
     [SerializeField] private float tiempoLimite = 10f;
-    [SerializeField] private float precisionMinima = 10f; 
+    [SerializeField] private float precisionMinima = 10f;
 
     [SerializeField] private Color colorNormal = Color.white;
     [SerializeField] private Color colorAlerta = Color.red;
@@ -50,10 +51,7 @@ public class EvaluadorTarea : MonoBehaviour
             float tiempoActual = Time.time - tiempoInicio;
             tiempoTMP.text = $"{tiempoActual:F2}s";
 
-            if (tiempoActual > tiempoLimite)
-                tiempoTMP.color = colorAlerta;
-            else
-                tiempoTMP.color = colorNormal;
+            tiempoTMP.color = tiempoActual > tiempoLimite ? colorAlerta : colorNormal;
         }
     }
 
@@ -80,7 +78,6 @@ public class EvaluadorTarea : MonoBehaviour
         tiempoTotal = Time.time - tiempoInicio;
         float precision = Vector3.Distance(objeto.transform.position, objetivoFinal.position);
 
-        // Evaluamos si pasó o no
         bool pasoTiempo = tiempoTotal <= tiempoLimite;
         bool pasoPrecision = precision <= precisionMinima;
         bool tareaCompletada = pasoTiempo && pasoPrecision;
@@ -107,7 +104,6 @@ public class EvaluadorTarea : MonoBehaviour
         objetivoFinal = null;
     }
 
-
     IEnumerator RegistrarTareaEnDB(float tiempo, bool completada)
     {
         string sesionId = PlayerPrefs.GetString("sesion_id");
@@ -118,7 +114,14 @@ public class EvaluadorTarea : MonoBehaviour
         }
 
         string url = $"{supabaseUrl}/rest/v1/sesion_tareas";
-        string jsonData = $"{{\"sesion_id\":{sesionId},\"tarea_id\":{tareaId},\"completada\":{completada.ToString().ToLower()},\"tiempo_empleado\":{Mathf.RoundToInt(tiempo)}}}";
+        string jsonData = $"{{" +
+            $"\"sesion_id\":\"{sesionId}\"," +
+            $"\"tarea_id\":{tareaId}," +
+            $"\"completada\":{completada.ToString().ToLower()}," +
+            $"\"tiempo_empleado\":{Mathf.RoundToInt(tiempo)}" +
+            $"}}";
+
+        Debug.Log("JSON enviado a sesion_tareas: " + jsonData);
 
         UnityWebRequest request = new UnityWebRequest(url, "POST");
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
@@ -153,12 +156,14 @@ public class EvaluadorTarea : MonoBehaviour
 
         string url = $"{supabaseUrl}/rest/v1/resultados_tareas";
         string jsonData = $"{{" +
-            $"\"sesion_id\":{sesionId}," +
+            $"\"sesion_id\":\"{sesionId}\"," +
             $"\"tarea_id\":{tareaId}," +
             $"\"usuario_id\":\"{userId}\"," +
-            $"\"tiempo\":{tiempo}," +
-            $"\"precision\":{precision}" +
+            $"\"tiempo\":{tiempo.ToString(CultureInfo.InvariantCulture)}," +
+            $"\"precision\":{precision.ToString(CultureInfo.InvariantCulture)}" +
             $"}}";
+
+        Debug.Log("JSON enviado a resultados_tareas: " + jsonData);
 
         UnityWebRequest request = new UnityWebRequest(url, "POST");
         byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(jsonData);
@@ -174,14 +179,13 @@ public class EvaluadorTarea : MonoBehaviour
         if (request.result == UnityWebRequest.Result.Success)
         {
             Debug.Log("Resultado registrado correctamente en resultados_tareas.");
-            TESTDEBUG.text =  "Resultado registrado correctamente en resultados_tareas.";
+            TESTDEBUG.text = "Resultado registrado correctamente.";
         }
         else
         {
             Debug.LogError("Error al registrar resultado: " + request.error);
             Debug.LogError("Respuesta servidor: " + request.downloadHandler.text);
-            TESTDEBUG.text =  "Error al registrar resultado: " + request.error + request.downloadHandler.text;
-            
+            TESTDEBUG.text = "Error: " + request.downloadHandler.text;
         }
     }
 
@@ -190,7 +194,7 @@ public class EvaluadorTarea : MonoBehaviour
         int inicio = texto.IndexOf(clave);
         if (inicio == -1) return null;
         inicio += clave.Length;
-        int fin = texto.IndexOfAny(new char[] { ',', '\"', '}' }, inicio);
+        int fin = texto.IndexOf("\"", inicio);
         return texto.Substring(inicio, fin - inicio);
     }
 }
