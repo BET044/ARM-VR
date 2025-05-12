@@ -823,7 +823,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   escenaNiveles: TAREAS MENU
   escenaOpciones: Opciones
-  escenaPerfil: Perfil
+  escenaPerfil: PERFIL
   mensaje: {fileID: 1339341383}
   mensaje2: {fileID: 982993055}
 --- !u!114 &339101540
@@ -840,7 +840,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   escena1: LEADERBOARD
   escena2: escena2
-  escena3: escena3
+  escena3: 
 --- !u!1 &373240002
 GameObject:
   m_ObjectHideFlags: 0
@@ -1353,7 +1353,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &731464945
 RectTransform:
   m_ObjectHideFlags: 0

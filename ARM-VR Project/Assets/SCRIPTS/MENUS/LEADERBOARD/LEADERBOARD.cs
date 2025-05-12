@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 using TMPro;
@@ -21,12 +23,11 @@ public class TareasYLeaderboard : MonoBehaviour
     public GameObject leaderboardItemPrefab;
 
     private Tarea[] tareas;
-    private int indiceActual = 3;
+    private int indiceActual = 0;
 
     void Start()
     {
         StartCoroutine(CargarTareas());
-        StartCoroutine(CargarLeaderboard());
         botonAnterior.onClick.AddListener(() => CambiarTarea(-1));
         botonSiguiente.onClick.AddListener(() => CambiarTarea(1));
     }
@@ -37,6 +38,7 @@ public class TareasYLeaderboard : MonoBehaviour
 
         indiceActual = Mathf.Clamp(indiceActual + cambio, 0, tareas.Length - 1);
         MostrarTareaActual();
+        StartCoroutine(CargarLeaderboard(tareas[indiceActual].id));
     }
 
     void MostrarTareaActual()
@@ -45,7 +47,15 @@ public class TareasYLeaderboard : MonoBehaviour
 
         Tarea actual = tareas[indiceActual];
         tituloTarea.text = actual.nombre;
-        descripcionTarea.text = actual.descripcion;
+
+        if (actual.id == 1)
+            descripcionTarea.text = "Completado";
+        else if (actual.id == 2)
+            descripcionTarea.text = "Menor distancia de error";
+        else if (actual.id == 3)
+            descripcionTarea.text = "Mayor cantidad de cajas movidas";
+        else
+            descripcionTarea.text = actual.descripcion;
     }
 
     IEnumerator CargarTareas()
@@ -68,11 +78,14 @@ public class TareasYLeaderboard : MonoBehaviour
 
         indiceActual = 0;
         MostrarTareaActual();
+        StartCoroutine(CargarLeaderboard(tareas[indiceActual].id)); // Cargar leaderboard de tarea 1 al iniciar
     }
 
-    IEnumerator CargarLeaderboard()
+    IEnumerator CargarLeaderboard(int tareaId)
     {
-        string url = $"{supabaseUrl}/rest/v1/resultados_tareas?select=usuario_id,usuarios(nombre),precision&order=precision.desc&limit=10";
+        string orden = (tareaId == 3) ? "precision.asc" : "precision.desc";
+
+        string url = $"{supabaseUrl}/rest/v1/resultados_tareas?select=usuario_id,usuarios(nombre),precision,tiempo,tarea_id&order={orden}&tarea_id=eq.{tareaId}";
         UnityWebRequest request = UnityWebRequest.Get(url);
         request.SetRequestHeader("apikey", apiKey);
         request.SetRequestHeader("Authorization", "Bearer " + apiKey);
@@ -88,15 +101,53 @@ public class TareasYLeaderboard : MonoBehaviour
         string json = "{\"items\":" + request.downloadHandler.text + "}";
         LeaderboardLista lista = JsonUtility.FromJson<LeaderboardLista>(json);
 
-        foreach (Transform child in leaderboardContent)
-            Destroy(child.gameObject);
+        Dictionary<string, LeaderboardEntry> mejoresPorUsuario = new();
 
         foreach (var entry in lista.items)
+        {
+            if (!mejoresPorUsuario.ContainsKey(entry.usuario_id))
+            {
+                mejoresPorUsuario[entry.usuario_id] = entry;
+            }
+            else
+            {
+                var mejor = mejoresPorUsuario[entry.usuario_id];
+
+                // Dependiendo de la tarea, elegir mejor precisión (o peor si es tarea 3)
+                if (tareaId == 3)
+                {
+                    // Para tarea 3: precisión más alta gana
+                    if (entry.precision > mejor.precision)
+                        mejoresPorUsuario[entry.usuario_id] = entry;
+                }
+                else
+                {
+                    // Para tarea 1 y 2: precisión más baja gana
+                    if (entry.precision < mejor.precision)
+                        mejoresPorUsuario[entry.usuario_id] = entry;
+                }
+            }
+        }
+
+        foreach (Transform child in leaderboardContent)
+            Destroy(child.gameObject);
+        
+        var ordenados = (tareaId == 2)
+            ? mejoresPorUsuario.Values.OrderByDescending(e => e.precision)
+            : mejoresPorUsuario.Values.OrderBy(e => e.precision);
+
+        foreach (var entry in ordenados)
         {
             GameObject item = Instantiate(leaderboardItemPrefab, leaderboardContent);
             TMP_Text[] textos = item.GetComponentsInChildren<TMP_Text>();
             textos[0].text = entry.usuarios.nombre;
-            textos[1].text = $"{entry.precision:F2}%";
+
+            if (tareaId == 1)
+                textos[1].text = "Completado";
+            else if (tareaId == 3)
+                textos[1].text = $"{entry.precision:F0}";
+            else
+                textos[1].text = $"{entry.precision:F2}";
         }
     }
 
@@ -121,6 +172,8 @@ public class TareasYLeaderboard : MonoBehaviour
         public string usuario_id;
         public Usuario usuarios;
         public float precision;
+        public float tiempo;
+        public int tarea_id;
     }
 
     [System.Serializable]

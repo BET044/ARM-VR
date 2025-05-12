@@ -3,17 +3,29 @@ using UnityEngine;
 public class CajaMover : MonoBehaviour
 {
     public float velocidad = 2f;
+    private bool sobreCinta = false;
 
-    private Rigidbody rb;
-
-    void Start()
+    void Update()
     {
-        rb = GetComponent<Rigidbody>();
+        if (sobreCinta)
+        {
+            transform.position += Vector3.right * velocidad * Time.deltaTime;
+        }
     }
 
-    void FixedUpdate()
+    private void OnTriggerEnter(Collider other)
     {
-        // Movimiento constante en el eje X (ajusta según la dirección de tu cinta)
-        rb.MovePosition(rb.position + Vector3.right * velocidad * Time.fixedDeltaTime);
+        if (other.CompareTag("ZonaCinta"))
+        {
+            sobreCinta = true;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("ZonaCinta"))
+        {
+            sobreCinta = false;
+        }
     }
 }

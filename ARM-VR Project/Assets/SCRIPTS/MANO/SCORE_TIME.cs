@@ -36,8 +36,6 @@ public class EvaluadorTareaTIME : MonoBehaviour
     [SerializeField] private Color colorNormal = Color.white;
     [SerializeField] private Color colorAlerta = Color.red;
 
-    private bool cuentaRegresivaTerminada = false;
-
     void Start()
     {
         if (PlayerPrefs.HasKey("session_data"))

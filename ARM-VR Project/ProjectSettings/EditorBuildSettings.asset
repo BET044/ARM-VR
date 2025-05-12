@@ -12,7 +12,7 @@ EditorBuildSettings:
     path: Assets/Scenes/MENU MAIN.unity
     guid: 5a97989af9120e442afe97197f8ee872
   - enabled: 1
-    path: Assets/Scenes/LEADERBOARD.unity
+    path: Assets/Scenes/PERFIL.unity
     guid: c6bdf0294bb552346a75f5ca7d08e3b1
   - enabled: 1
     path: Assets/Scenes/TAREAS MENU.unity
@@ -26,6 +26,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/LVL3.unity
     guid: 10a4bba16876ca7468adef69c7e7ade9
+  - enabled: 1
+    path: Assets/Scenes/LEADERBOARD.unity
+    guid: 1c505d924d898b44bbb403e48ea248c0
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

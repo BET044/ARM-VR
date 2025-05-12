@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Objeto
   - ObjetoTutorial
+  - ZonaCinta
   layers:
   - Default
   - TransparentFX
