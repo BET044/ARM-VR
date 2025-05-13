@@ -1,9 +1,9 @@
 [![Play on Itch.io](https://img.shields.io/badge/Play%20on-Itch.io-red?logo=itch-io)](https://b3tox.itch.io/arm-vr)
 
 # ARM-VR
-
-Simulador de Brazo Mecánico para Manipulación de Objetos**
 ---
+Simulador de Brazo Mecánico para Manipulación de Objetos**
+
 ## Enlace al Proyecto
 
 👉 [Juega ARM-VR en Itch.io](https://b3tox.itch.io/arm-vr)
