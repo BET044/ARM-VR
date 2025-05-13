@@ -2,7 +2,7 @@
 
 # ARM-VR
 
-**Simulador de Brazo Mecánico para Manipulación de Objetos**
+*Simulador de Brazo Mecánico para Manipulación de Objetos**
 ---
 ## Enlace al Proyecto
 
