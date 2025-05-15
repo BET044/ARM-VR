@@ -2,11 +2,11 @@
 
 # ARM-VR
 
-**Simulador de Brazo Mecánico para Manipulación de Objetos**
----
+Simulador de Brazo Mecánico para Manipulación de Objetos
+
 ## Enlace al Proyecto
 
-👉 [Juega ARM-VR en Itch.io](https://b3tox.itch.io/arm-vr)
+👉 [Prueba ARM-VR en Itch.io](https://b3tox.itch.io/arm-vr)
 ---
 
 ## Descripción
