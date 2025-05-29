@@ -2,54 +2,36 @@
 
 # ARM-VR
 
-Simulador de Brazo Mecánico para Manipulación de Objetos
+Robotic Arm Simulator for Object Manipulation
 
-## Enlace al Proyecto
+## Project Link
 
-👉 [Prueba ARM-VR en Itch.io](https://b3tox.itch.io/arm-vr)
+👉 [Try ARM-VR on Itch.io](https://b3tox.itch.io/arm-vr)
 ---
 
-## Descripción
+## Description
 
-**ARM-VR** es un simulador interactivo desarrollado en **Unity (v6000.0.35f1)** que reproduce el funcionamiento de un brazo mecánico programado para manipular cajas. Permite a los usuarios realizar tareas que requieren **precisión, rapidez y coordinación**, mediante una interfaz accesible y distintos modos de operación con objetivos específicos.
+**ARM-VR** is an interactive simulator developed in **Unity (v6000.0.35f1)** that replicates the operation of a robotic arm programmed to handle boxes. It allows users to perform tasks that require **precision, speed, and coordination**, through an accessible interface and various operation modes with specific objectives.
 
-El proyecto busca ofrecer una experiencia inmersiva de capacitación en entornos virtuales, evaluando el rendimiento del usuario y fomentando el aprendizaje práctico en contextos simulados.
-
----
-
-## Características
-
-- Control intuitivo del brazo robótico
-- Interacción con objetos físicos virtuales
-- Entrenamiento por escenarios
-- Evaluación de desempeño por tareas
-- Modo de simulación y desafío
+The project aims to provide an immersive training experience in virtual environments, assessing user performance and promoting hands-on learning in simulated contexts.
 
 ---
 
-## Tecnologías
+## Features
+
+- Intuitive control of the robotic arm  
+- Interaction with virtual physical objects  
+- Scenario-based training  
+- Task-based performance evaluation  
+- Simulation and challenge modes  
+
+---
+
+## Technologies
 
 - Unity 6000.0.35f1  
 - C#  
-- Integración en WebGL vía Itch.io  
-- DB Suprabase
+- WebGL integration via Itch.io  
+- Supabase DB
 
 ---
-
-## Proyecto Académico
-
-Desarrollado como parte del curso **Ingeniería de Software** en el:
-
-**Centro Universitario de Ciencias Exactas e Ingenierías (CUCEI)**  
-**Universidad de Guadalajara**
-
----
-
-## Equipo de Desarrollo
-
-- Grace Haraxai Moreno Quijada – 219097463  
-- Paul Iván Ramos de la Torre – 323003139  
-- Carlos Alberto Mariscal Romo – 219804747  
-- Ángel Xavier Ramírez Rodríguez – 219709728  
-- Carlos Andrei Saucedo Aguilar – 223386488  
-
